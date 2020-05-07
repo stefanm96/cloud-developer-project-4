@@ -6,6 +6,7 @@ import { TodoAccess } from '../dataLayer/todosAccess'
 
 const todoAccess = new TodoAccess()
 
+// creates a todo item
 export async function createTodo(
     createTodoRequest: CreateTodoRequest,
     jwtToken: string
@@ -24,6 +25,9 @@ export async function createTodo(
     })
 }
 
-export async function getAllTodos(userId: String): Promise<TodoItem[]> {
+// gets all Todos by the userId
+export async function getAllTodos(jwtToken: string): Promise<TodoItem[]> {
+    const userId = parseUserId(jwtToken)
+
     return todoAccess.getAllTodos(userId)
 }
