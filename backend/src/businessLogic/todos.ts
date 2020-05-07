@@ -4,6 +4,7 @@ import { TodoItem } from '../models/TodoItem'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { TodoAccess } from '../dataLayer/todosAccess'
 import { stringify } from 'querystring'
+import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 
 const todoAccess = new TodoAccess()
 
@@ -41,4 +42,20 @@ export async function getAttachmentUploadUrl(jwtToken: string, todoId: string) {
 
 export async function todoExists(userId: string, todoId: string): Promise<Boolean> {
     return todoAccess.todoExists(userId, todoId)
+}
+
+export async function deleteTodo(jwtToken: string, todoId: string) {
+    const userId = parseUserId(jwtToken)
+
+    return todoAccess.deleteTodo(userId, todoId)
+}
+
+export async function updateTodo(updateTodoRequest: UpdateTodoRequest, jwtToken: string, todoId: string) {
+    const userId = parseUserId(jwtToken)
+
+    const todoUpdate = {
+        ...updateTodoRequest
+    }
+
+    return todoAccess.updateTodo(todoUpdate, userId, todoId)
 }

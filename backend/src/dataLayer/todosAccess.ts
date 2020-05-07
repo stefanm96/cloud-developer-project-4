@@ -3,6 +3,7 @@ import * as AWSXRay from 'aws-xray-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { TodoItem } from '../models/TodoItem'
 import { createLogger } from '../utils/logger'
+import { TodoUpdate } from '../models/TodoUpdate'
 
 const logger = createLogger('todosAccess')
 
@@ -68,6 +69,34 @@ export class TodoAccess {
             Key: todoId,
             Expires: urlExpiration
         })
+    }
+
+    async deleteTodo(userId: string, todoId: string) {
+        await this.docClient.delete({
+            TableName: this.todosTable,
+            Key: {
+                userId: userId,
+                todoId: todoId
+            }
+        }).promise()
+
+        logger.info('deleted todo: ', todoId)
+    }
+
+    async updateTodo(todoUpdate: TodoUpdate, userId: string, todoId: string) {
+        await this.docClient.update({
+            TableName: this.todosTable,
+            Key: {
+                userId: userId,
+                todoId: todoId
+            },
+            UpdateExpression: 'SET name = :name, dueDate = :dueDate, done = :done',
+            ExpressionAttributeValues: {
+              ':name' : todoUpdate.name,
+              ':dueDate' : todoUpdate.dueDate,
+              ':done' : todoUpdate.done
+            }
+        }).promise()
     }
 }
 
