@@ -3,6 +3,7 @@ import { parseUserId } from '../auth/utils'
 import { TodoItem } from '../models/TodoItem'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { TodoAccess } from '../dataLayer/todosAccess'
+import { stringify } from 'querystring'
 
 const todoAccess = new TodoAccess()
 
@@ -30,4 +31,14 @@ export async function getAllTodos(jwtToken: string): Promise<TodoItem[]> {
     const userId = parseUserId(jwtToken)
 
     return todoAccess.getAllTodos(userId)
+}
+
+export async function getAttachmentUploadUrl(jwtToken: string, todoId: string) {
+    const userId = parseUserId(jwtToken)
+
+    return todoAccess.getAttachementUploadUrl(todoId)
+}
+
+export async function todoExists(userId: string, todoId: string): Promise<Boolean> {
+    return todoAccess.todoExists(userId, todoId)
 }

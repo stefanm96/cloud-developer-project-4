@@ -8,11 +8,15 @@ const logger = createLogger('todosAccess')
 
 const XAWS = AWSXRay.captureAWS(AWS)
 
+const bucketName = process.env.ATTACHMENTS_S3_BUCKET
+const urlExpiration = process.env.SIGNED_URL_EXPIRATION
+
 export class TodoAccess {
 
     constructor(
         private readonly docClient: DocumentClient = createDynamoDBClient(),
-        private readonly todosTable = process.env.TODOS_TABLE) {
+        private readonly todosTable = process.env.TODOS_TABLE,
+        private readonly s3 = createS3Client()) {
     }
 
     async getAllTodos(userId: string): Promise<TodoItem[]> {
@@ -31,12 +35,39 @@ export class TodoAccess {
     }
 
     async createTodo(todo: TodoItem): Promise<TodoItem> {
+        todo = {
+            ...todo,
+            attachmentUrl: `https://${bucketName}.s3.amazonaws.com/${todo.todoId}`
+        }
+
         await this.docClient.put({
             TableName: this.todosTable,
             Item: todo
         }).promise()
 
         return todo
+    }
+
+    async todoExists(userId: string, todoId: string): Promise<Boolean> {
+        const result = await this.docClient
+            .get({
+                TableName: this.todosTable,
+                Key: {
+                    userId: userId,
+                    todoId: todoId
+                }
+            }).promise()
+
+        logger.info('Get todo: ', result)
+        return !!result.Item
+    }
+
+    async getAttachementUploadUrl(todoId: string): Promise<string> {
+        return this.s3.getSignedUrl('putObject', {
+            Bucket: bucketName,
+            Key: todoId,
+            Expires: urlExpiration
+        })
     }
 }
 
@@ -50,4 +81,14 @@ function createDynamoDBClient() {
     }
 
     return new XAWS.DynamoDB.DocumentClient()
+}
+
+function createS3Client() {
+    if (process.env.IS_OFFLINE) {
+        logger.info('local')
+    }
+
+    return new XAWS.S3({
+        signatureVersion: 'v4'
+    })
 }
