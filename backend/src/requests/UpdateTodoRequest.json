@@ -1,19 +1,10 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/TodoItem",
+    "$ref": "#/definitions/UpdateTodoRequest",
     "definitions": {
-        "TodoItem": {
+        "UpdateTodoRequest": {
             "type": "object",
             "properties": {
-                "userId": {
-                    "type": "string"
-                },
-                "todoId": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
                 "name": {
                     "type": "string"
                 },
@@ -22,15 +13,9 @@
                 },
                 "done": {
                     "type": "boolean"
-                },
-                "attachmentUrl": {
-                    "type": "string"
                 }
             },
             "required": [
-                "userId",
-                "todoId",
-                "createdAt",
                 "name",
                 "dueDate",
                 "done"

@@ -1,5 +1,4 @@
-import * as AWS from 'aws-sdk'
-import * as AWSXRay from 'aws-xray-sdk'
+var AWSXRay = require('aws-xray-sdk');
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { TodoItem } from '../models/TodoItem'
 import { createLogger } from '../utils/logger'
@@ -7,7 +6,7 @@ import { TodoUpdate } from '../models/TodoUpdate'
 
 const logger = createLogger('todosAccess')
 
-const XAWS = AWSXRay.captureAWS(AWS)
+var AWS = AWSXRay.captureAWS(require('aws-sdk'));
 
 const bucketName = process.env.ATTACHMENTS_S3_BUCKET
 const urlExpiration = process.env.SIGNED_URL_EXPIRATION
@@ -36,11 +35,6 @@ export class TodoAccess {
     }
 
     async createTodo(todo: TodoItem): Promise<TodoItem> {
-        todo = {
-            ...todo,
-            attachmentUrl: `https://${bucketName}.s3.amazonaws.com/${todo.todoId}`
-        }
-
         await this.docClient.put({
             TableName: this.todosTable,
             Item: todo
@@ -50,33 +44,54 @@ export class TodoAccess {
     }
 
     async todoExists(userId: string, todoId: string): Promise<Boolean> {
-        const result = await this.docClient
-            .get({
-                TableName: this.todosTable,
-                Key: {
-                    userId: userId,
-                    todoId: todoId
-                }
-            }).promise()
-
+        logger.info('userId: ', userId)
+        logger.info('todoId: ', todoId)
+        
+        const result = await this.docClient.query({
+            TableName: this.todosTable,
+            KeyConditionExpression: 'userId = :userId AND todoId = :todoId',
+            ExpressionAttributeValues: {
+                ':userId': userId,
+                ':todoId': todoId
+            },
+            ScanIndexForward: false
+        }).promise()
+        
         logger.info('Get todo: ', result)
-        return !!result.Item
+        return result.Count > 0
     }
 
-    async getAttachementUploadUrl(todoId: string): Promise<string> {
-        return this.s3.getSignedUrl('putObject', {
+    async getAttachementUploadUrl(userId:string, todoId: string): Promise<string> {
+        const signedUrl = this.s3.getSignedUrl('putObject', {
             Bucket: bucketName,
             Key: todoId,
-            Expires: urlExpiration
+            Expires: parseInt(urlExpiration)
         })
+
+        await this.docClient.update({
+            TableName: this.todosTable,
+            Key: {
+                'userId' : userId,
+                'todoId' : todoId
+            },
+            UpdateExpression: 'SET #attachmentUrl = :attachmentUrl',
+            ExpressionAttributeNames: {
+                '#attachmentUrl': 'attachmentUrl',
+            },
+            ExpressionAttributeValues: {
+                ':attachmentUrl': `https://${bucketName}.s3.amazonaws.com/${todoId}`
+            }
+        }).promise()
+
+        return signedUrl
     }
 
     async deleteTodo(userId: string, todoId: string) {
         await this.docClient.delete({
             TableName: this.todosTable,
             Key: {
-                userId: userId,
-                todoId: todoId
+                'userId' : userId,
+                'todoId' : todoId
             }
         }).promise()
 
@@ -87,10 +102,15 @@ export class TodoAccess {
         await this.docClient.update({
             TableName: this.todosTable,
             Key: {
-                userId: userId,
-                todoId: todoId
+                'userId' : userId,
+                'todoId' : todoId
             },
-            UpdateExpression: 'SET name = :name, dueDate = :dueDate, done = :done',
+            UpdateExpression: 'SET #name = :name, #dueDate = :dueDate, #done = :done',
+            ExpressionAttributeNames: {
+                '#name': 'name',
+                '#dueDate': 'dueDate',
+                '#done': 'done',
+            },
             ExpressionAttributeValues: {
               ':name' : todoUpdate.name,
               ':dueDate' : todoUpdate.dueDate,
@@ -103,13 +123,13 @@ export class TodoAccess {
 function createDynamoDBClient() {
     if (process.env.IS_OFFLINE) {
         logger.info('Creating a local DynamoDB instance')
-        return new XAWS.DynamoDB.DocumentClient({
+        return new AWS.DynamoDB.DocumentClient({
             region: 'localhost',
             endpoint: 'http://localhost:8000'
         })
     }
 
-    return new XAWS.DynamoDB.DocumentClient()
+    return new AWS.DynamoDB.DocumentClient()
 }
 
 function createS3Client() {
@@ -117,7 +137,7 @@ function createS3Client() {
         logger.info('local')
     }
 
-    return new XAWS.S3({
+    return new AWS.S3({
         signatureVersion: 'v4'
     })
 }

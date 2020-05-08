@@ -1,9 +1,7 @@
 import * as uuid from 'uuid'
-import { parseUserId } from '../auth/utils'
 import { TodoItem } from '../models/TodoItem'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { TodoAccess } from '../dataLayer/todosAccess'
-import { stringify } from 'querystring'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 
 const todoAccess = new TodoAccess()
@@ -11,10 +9,9 @@ const todoAccess = new TodoAccess()
 // creates a todo item
 export async function createTodo(
     createTodoRequest: CreateTodoRequest,
-    jwtToken: string
+    userId: string
 ): Promise<TodoItem> {
 
-    const userId = parseUserId(jwtToken)
     const itemId = uuid.v4()
 
     return await todoAccess.createTodo({
@@ -28,31 +25,23 @@ export async function createTodo(
 }
 
 // gets all Todos by the userId
-export async function getAllTodos(jwtToken: string): Promise<TodoItem[]> {
-    const userId = parseUserId(jwtToken)
-
+export async function getAllTodos(userId: string): Promise<TodoItem[]> {
     return todoAccess.getAllTodos(userId)
 }
 
-export async function getAttachmentUploadUrl(jwtToken: string, todoId: string) {
-    const userId = parseUserId(jwtToken)
-
-    return todoAccess.getAttachementUploadUrl(todoId)
+export async function getAttachmentUploadUrl(userId: string, todoId: string) {
+    return todoAccess.getAttachementUploadUrl(userId, todoId)
 }
 
 export async function todoExists(userId: string, todoId: string): Promise<Boolean> {
     return todoAccess.todoExists(userId, todoId)
 }
 
-export async function deleteTodo(jwtToken: string, todoId: string) {
-    const userId = parseUserId(jwtToken)
-
+export async function deleteTodo(userId: string, todoId: string) {
     return todoAccess.deleteTodo(userId, todoId)
 }
 
-export async function updateTodo(updateTodoRequest: UpdateTodoRequest, jwtToken: string, todoId: string) {
-    const userId = parseUserId(jwtToken)
-
+export async function updateTodo(updateTodoRequest: UpdateTodoRequest, userId: string, todoId: string) {
     const todoUpdate = {
         ...updateTodoRequest
     }
