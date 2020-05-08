@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d0700d24-79ec-487e-8403-b565bef7f8e0",
+		"_postman_id": "b0cf84c7-2388-40b4-9590-7faff1deb06e",
 		"name": "Udacity C4 Project",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -19,10 +19,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos",
 							"protocol": "https",
@@ -43,6 +39,21 @@
 				},
 				{
 					"name": "Create todo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6d11cf1d-cda0-4d15-9117-3f915baf8907",
+								"exec": [
+									"pm.test(\"\", function () {",
+									"    var jsonData = pm.response.json().item;",
+									"    pm.collectionVariables.set(\"todoId\", jsonData.todoId);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -83,7 +94,7 @@
 				{
 					"name": "Update todo",
 					"request": {
-						"method": "PUT",
+						"method": "PATCH",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -99,10 +110,15 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"Change the world\",\n\t\"dueDate\": \"2019-12-11\",\n\t\"done\": true\n}"
+							"raw": "{\n\t\"name\": \"Change the world\",\n\t\"dueDate\": \"2019-12-11\",\n\t\"done\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/35dd600f-43c2-4649-903c-615e1586a26f",
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/{{todoId}}",
 							"protocol": "https",
 							"host": [
 								"{{apiId}}",
@@ -114,7 +130,7 @@
 							"path": [
 								"dev",
 								"todos",
-								"35dd600f-43c2-4649-903c-615e1586a26f"
+								"{{todoId}}"
 							]
 						}
 					},
@@ -142,7 +158,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/fe671583-4512-45f6-9475-4265c04362fb",
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/{{todoId}}",
 							"protocol": "https",
 							"host": [
 								"{{apiId}}",
@@ -154,7 +170,7 @@
 							"path": [
 								"dev",
 								"todos",
-								"fe671583-4512-45f6-9475-4265c04362fb"
+								"{{todoId}}"
 							]
 						}
 					},
@@ -176,7 +192,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/3836b777-9bc4-4429-9b79-ba4e4f5f91c0/attachment",
+							"raw": "https://{{apiId}}.execute-api.us-east-1.amazonaws.com/dev/todos/{{todoId}}/attachment",
 							"protocol": "https",
 							"host": [
 								"{{apiId}}",
@@ -188,7 +204,7 @@
 							"path": [
 								"dev",
 								"todos",
-								"3836b777-9bc4-4429-9b79-ba4e4f5f91c0",
+								"{{todoId}}",
 								"attachment"
 							]
 						}
@@ -200,7 +216,7 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "ce2b42d4-8cc5-4f30-a6ed-e7f0f303c3fd",
+						"id": "b82dce69-8b27-4ef6-9ba0-083421363f68",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -210,21 +226,22 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "efb16c49-3866-4241-97d1-360ad72736d8",
+						"id": "fe52a24a-a855-4636-b5ac-855c8bef603e",
 						"type": "text/javascript",
 						"exec": [
 							""
 						]
 					}
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		}
 	],
 	"event": [
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "2e83c0fe-6650-44d5-a90f-4c27ff720d83",
+				"id": "6fd90e6c-5b97-4641-84af-ddb16a89ea39",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -234,7 +251,7 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "977c227e-2df3-42eb-9a48-ec25e2f7eeae",
+				"id": "dfa58130-a346-4ff6-ba7e-2ffb1f3534f7",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -244,16 +261,23 @@
 	],
 	"variable": [
 		{
-			"id": "bf208e6b-f66d-4008-9366-dd541ff65425",
+			"id": "135e18cc-c027-4d65-92b4-fbdfed12c44d",
 			"key": "apiId",
-			"value": "",
+			"value": "vewe8cs61js",
 			"type": "string"
 		},
 		{
-			"id": "9bc6399a-d2bb-4f2d-9ffa-8480370d383c",
+			"id": "a2f41267-b662-4799-9f89-9b720b2eba13",
 			"key": "authToken",
+			"value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Im50QnlCcWF4UlVGd2ZUN2d6UTBoVSJ9.eyJpc3MiOiJodHRwczovL3N0ZWZhbm1pLWRldi5hdXRoMC5jb20vIiwic3ViIjoiZ29vZ2xlLW9hdXRoMnwxMTcxNjUxMjAzMjEyNzcxNzc2OTIiLCJhdWQiOiJoVFo3Q3dMdzcxSEl0d2RTSGt2SFVubXVhU1dRRGZhYyIsImlhdCI6MTU4ODg2MjAxOCwiZXhwIjoxNTg4ODk4MDE4LCJhdF9oYXNoIjoibXBoWWhLa0xHUm9CenRYNFdudThSQSIsIm5vbmNlIjoiY0V3QTd2eFpSS2VGMXpDQkVsLUJMVVJjeTBqTmRQQVgifQ.VHpuXQOPGVwcoIapCQHH94VBQymfZ5CKUTuxKoLJLLxF1bPspKUdXRzIdNJ-0YbNKkgKgPaL2rcR7dWeXWZtv22porNS-v-4omrbmGdhA55SO0y7_a49fkaskmnWOhUuBPUjAjr2Z89cFSyHyzUD2bDDFGM1YO4NOchvpr_vI5hJmtAI0rYroasLjgq-wcLn6n3J9lz7dRs9BxDetZyPFO1JNckfLExUPidR3ilu0Ohv3Yaa2CKTrvssJ_nlU-4hr8OL5ltnq06muySXLy-yyXDRlRpJPvzsSLh9W58cWJl96AeGXK9zRCJQx5xMVwTtAo2UtPbgebWOsiTf_96FSw",
+			"type": "string"
+		},
+		{
+			"id": "52e5a3f9-aef2-4dd1-8c19-6041e594e448",
+			"key": "todoId",
 			"value": "",
 			"type": "string"
 		}
-	]
+	],
+	"protocolProfileBehavior": {}
 }
